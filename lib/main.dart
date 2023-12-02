@@ -109,9 +109,24 @@ class _MyAppState extends State<MyApp> {
         // appBar: AppBar(
         //   title: const Text('Flutter layout demo'),
         // ),
-        body: ListView(
+        body: Column(
           children: [
-            ...likableItems,
+            Image.asset(
+              'images/lake.jpg',
+              width: 600,
+              height: 240,
+              fit: BoxFit.cover,
+            ),
+            Expanded(
+              child: ListView(
+                children: [
+                  ...likableItems,
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 100,
+            ),
           ],
         ),
         floatingActionButton: ExpandableFloatingActionButton(
