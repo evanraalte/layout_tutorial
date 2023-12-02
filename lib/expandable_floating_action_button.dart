@@ -19,6 +19,8 @@ class _ExpandableFloatingActionButtonState
     extends State<ExpandableFloatingActionButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
+  late Animation<Offset> _positionAnimation;
+
   bool isExpanded = false;
 
   @override
@@ -27,6 +29,16 @@ class _ExpandableFloatingActionButtonState
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
+    );
+
+    _positionAnimation = Tween<Offset>(
+      begin: const Offset(0, 2),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
     );
   }
 
@@ -43,26 +55,34 @@ class _ExpandableFloatingActionButtonState
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           // Button 1
-          Visibility(
-            visible: isExpanded,
-            child: FloatingActionButton(
-              onPressed: widget.onAddItem,
-              tooltip: 'Add Item',
-              child: const Icon(Icons.favorite),
+          AnimatedOpacity(
+            opacity: isExpanded ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: SlideTransition(
+              position: _positionAnimation,
+              child: FloatingActionButton(
+                onPressed: widget.onAddItem,
+                tooltip: 'Add Item',
+                child: const Icon(Icons.favorite),
+              ),
             ),
           ),
-          const SizedBox(height: 10), // Spacing between buttons
+          const SizedBox(height: 10),
 
           // Button 2
-          Visibility(
-            visible: isExpanded,
-            child: FloatingActionButton(
-              onPressed: () => widget.onAddCustomItem(context),
-              tooltip: 'Add Custom Item',
-              child: const Icon(Icons.create),
+          AnimatedOpacity(
+            opacity: isExpanded ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: SlideTransition(
+              position: _positionAnimation,
+              child: FloatingActionButton(
+                onPressed: () => widget.onAddCustomItem(context),
+                tooltip: 'Add Custom Item',
+                child: const Icon(Icons.create),
+              ),
             ),
           ),
-          const SizedBox(height: 10), // Spacing between buttons
+          const SizedBox(height: 10),
 
           // Main expandable button
           FloatingActionButton(
