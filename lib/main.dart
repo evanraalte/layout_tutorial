@@ -127,6 +127,7 @@ class _MyAppState extends State<MyApp> {
                     return Text('Error: ${snapshot.error}');
                   } else if (snapshot.hasData) {
                     return ListView(
+                      padding: EdgeInsets.only(bottom: 100),
                       children: snapshot.data!
                           .map((success) => LikableItem(
                                 success: success,
@@ -139,9 +140,9 @@ class _MyAppState extends State<MyApp> {
                 },
               ),
             ),
-            const SizedBox(
-              height: 100,
-            ),
+            // const SizedBox(
+            //   height: 100,
+            // ),
           ],
         ),
         floatingActionButton: ExpandableFloatingActionButton(
