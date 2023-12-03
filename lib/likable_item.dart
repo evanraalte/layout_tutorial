@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:layout_tutorial/db.dart';
 import 'favorite_widget.dart'; // Assuming FavoriteWidget is in a separate file
 
 class LikableItem extends StatelessWidget {
-  final String title;
-  final String subtitle;
+  final Success success;
 
   const LikableItem({
     super.key,
-    this.title = "title",
-    this.subtitle = "subtitle",
+    required this.success,
   });
 
   @override
@@ -21,9 +20,10 @@ class LikableItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
+                Text(success.title,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(subtitle, style: TextStyle(color: Colors.grey[500])),
+                Text(success.subtitle,
+                    style: TextStyle(color: Colors.grey[500])),
               ],
             ),
           ),

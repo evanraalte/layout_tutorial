@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:layout_tutorial/db.dart';
 import 'package:layout_tutorial/expandable_floating_action_button.dart';
 import 'package:layout_tutorial/likable_item.dart';
 import 'package:layout_tutorial/utils.dart';
@@ -6,8 +7,9 @@ import 'package:layout_tutorial/utils.dart';
 // Uncomment lines 3 and 6 to view the visual layout at runtime.
 // import 'package:flutter/rendering.dart' show debugPaintSizeEnabled;
 
-void main() {
-  // debugPaintSizeEnabled = true;
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SuccessDatabaseService().initDatabase();
   runApp(const MyApp());
 }
 
@@ -19,7 +21,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  List<Widget> likableItems = [];
+  late Future<List<Success>> _successListFuture;
   bool isExpanded = false;
 
   Future<void> _showAddItemDialog(BuildContext context) async {
@@ -59,12 +61,12 @@ class _MyAppState extends State<MyApp> {
             ),
             TextButton(
               child: const Text('Add'),
-              onPressed: () {
+              onPressed: () async {
                 if (title.isNotEmpty && subtitle.isNotEmpty) {
-                  setState(() {
-                    likableItems
-                        .add(LikableItem(title: title, subtitle: subtitle));
-                  });
+                  Success newSuccess =
+                      Success(title: title, subtitle: subtitle);
+                  await SuccessDatabaseService().insertSuccess(newSuccess);
+                  _refreshSuccessList();
                   Navigator.of(context).pop();
                 }
               },
@@ -78,24 +80,22 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Initialize with some items if necessary
-    likableItems = List.generate(
-      2,
-      (index) => LikableItem(
-        title: getRandomTitle(adjectives, nouns),
-        subtitle: 'Subtitle ${index + 1}',
-      ),
-    );
+    _successListFuture = SuccessDatabaseService().successes();
   }
 
-  void _addLikableItem() {
+  void _addLikableItem() async {
+    String title = getRandomTitle(adjectives, nouns);
+    String subtitle =
+        'Subtitle ${DateTime.now().millisecondsSinceEpoch}'; // Example subtitle
+
+    Success newSuccess = Success(title: title, subtitle: subtitle);
+    await SuccessDatabaseService().insertSuccess(newSuccess);
+    _refreshSuccessList();
+  }
+
+  void _refreshSuccessList() {
     setState(() {
-      likableItems.add(
-        LikableItem(
-          title: getRandomTitle(adjectives, nouns),
-          subtitle: 'Subtitle ${likableItems.length + 1}',
-        ),
-      );
+      _successListFuture = SuccessDatabaseService().successes();
     });
   }
 
@@ -118,10 +118,25 @@ class _MyAppState extends State<MyApp> {
               fit: BoxFit.cover,
             ),
             Expanded(
-              child: ListView(
-                children: [
-                  ...likableItems,
-                ],
+              child: FutureBuilder<List<Success>>(
+                future: _successListFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData) {
+                    return ListView(
+                      children: snapshot.data!
+                          .map((success) => LikableItem(
+                                success: success,
+                              ))
+                          .toList(),
+                    );
+                  } else {
+                    return const Text('No data available');
+                  }
+                },
               ),
             ),
             const SizedBox(
