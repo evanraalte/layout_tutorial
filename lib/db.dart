@@ -69,6 +69,14 @@ class SuccessDatabaseService {
     );
   }
 
+  Future<void> deleteSuccess(int id) async {
+    await _database.delete(
+      'successes',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> insertSuccess(Success success) async {
     var now = DateTime.now();
     var successToInsert = Success(
