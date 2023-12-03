@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:layout_tutorial/db.dart';
+import 'package:layout_tutorial/utils.dart';
 import 'favorite_widget.dart'; // Assuming FavoriteWidget is in a separate file
 
 class LikableItem extends StatelessWidget {
@@ -23,6 +24,8 @@ class LikableItem extends StatelessWidget {
                 Text(success.title,
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(success.subtitle,
+                    style: TextStyle(color: Colors.grey[500])),
+                Text('created: ${formatDateTime(success.created)}',
                     style: TextStyle(color: Colors.grey[500])),
               ],
             ),

@@ -69,9 +69,9 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
               Colors.orange,
               Colors.purple
             ], // Add more colors as you like
-            maxBlastForce: 20, // set a lower max blast force
+            maxBlastForce: 10, // set a lower max blast force
             minBlastForce: 2, // set a lower min blast force
-            numberOfParticles: 20, // number of particles to be emitted
+            numberOfParticles: 50, // number of particles to be emitted
           ),
         ],
       ),

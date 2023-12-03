@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:layout_tutorial/utils.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -30,7 +31,7 @@ class Success {
 
   @override
   String toString() {
-    return 'Success{id: $id, title: $title, subtitle: $subtitle, created: ${created?.toIso8601String() ?? 'null'}, modified: ${modified?.toIso8601String() ?? 'null'}}';
+    return 'Success{id: $id, title: $title, subtitle: $subtitle, created: ${formatDateTime(created)}, modified: ${formatDateTime(modified)}}';
   }
 }
 
