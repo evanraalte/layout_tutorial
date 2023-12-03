@@ -7,27 +7,30 @@ class Success {
   final int? id;
   final String title;
   final String subtitle;
+  final DateTime? created;
+  final DateTime? modified;
 
   const Success({
     this.id,
     required this.title,
     required this.subtitle,
+    this.created,
+    this.modified,
   });
 
   Map<String, dynamic> toMap() {
-    // Only include the id in the map if it is not null
     return {
       if (id != null) 'id': id,
       'title': title,
       'subtitle': subtitle,
+      if (created != null) 'created': created!.toIso8601String(),
+      if (modified != null) 'modified': modified!.toIso8601String(),
     };
   }
 
-  // Implement toString to make it easier to see information about
-  // each dog when using the print statement.
   @override
   String toString() {
-    return 'Success{id: $id, title: $title, subtitle: $subtitle}';
+    return 'Success{id: $id, title: $title, subtitle: $subtitle, created: ${created?.toIso8601String() ?? 'null'}, modified: ${modified?.toIso8601String() ?? 'null'}}';
   }
 }
 
@@ -39,22 +42,44 @@ class SuccessDatabaseService {
 
   late Database _database;
 
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE successes ADD COLUMN created TEXT');
+      await db.execute('ALTER TABLE successes ADD COLUMN modified TEXT');
+
+      // Optionally, set default values for existing rows
+      var now = DateTime.now().toIso8601String();
+      await db.rawUpdate(
+          'UPDATE successes SET created = ?, modified = ?', [now, now]);
+    }
+    // Implement further migrations if newVersion > 2
+  }
+
   Future<void> initDatabase() async {
     _database = await openDatabase(
       join(await getDatabasesPath(), 'success_database.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE successes(id INTEGER PRIMARY KEY, title TEXT, subtitle TEXT)',
+          'CREATE TABLE successes(id INTEGER PRIMARY KEY, title TEXT, subtitle TEXT, created TEXT, modified TEXT)',
         );
       },
-      version: 1,
+      onUpgrade: _onUpgrade,
+      version: 2,
     );
   }
 
   Future<void> insertSuccess(Success success) async {
+    var now = DateTime.now();
+    var successToInsert = Success(
+      title: success.title,
+      subtitle: success.subtitle,
+      created: now,
+      modified: now,
+    );
+
     await _database.insert(
       'successes',
-      success.toMap(),
+      successToInsert.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -62,10 +87,19 @@ class SuccessDatabaseService {
   Future<List<Success>> successes() async {
     final List<Map<String, dynamic>> maps = await _database.query('successes');
     return List.generate(maps.length, (i) {
+      DateTime? created = maps[i]['created'] != null
+          ? DateTime.parse(maps[i]['created'])
+          : null;
+      DateTime? modified = maps[i]['modified'] != null
+          ? DateTime.parse(maps[i]['modified'])
+          : null;
+
       return Success(
         id: maps[i]['id'],
         title: maps[i]['title'],
         subtitle: maps[i]['subtitle'],
+        created: created,
+        modified: modified,
       );
     });
   }
