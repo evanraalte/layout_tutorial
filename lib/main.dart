@@ -63,6 +63,24 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     // Generate a list of LikableItem widgets
 
+    var boxWithStuff = Expanded(
+      child: FutureBuilder<List<Success>>(
+        future: _successListFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            return listViewSuccesses(context, snapshot);
+          } else if (selectedDate.isAfter(DateTime.now())) {
+            return const Text("You're adding successes in the future😁");
+          } else {
+            return const Text('No data available');
+          }
+        },
+      ),
+    );
     return MaterialApp(
       title: 'Flutter layout demo',
       theme: ThemeData(
@@ -95,58 +113,7 @@ class _MyAppState extends State<MyApp> {
               selectedDate: selectedDate,
               onDateChanged: _onDateChanged,
             ),
-            Expanded(
-              child: FutureBuilder<List<Success>>(
-                future: _successListFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                    return ListView(
-                      padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).size.height * 0.1),
-                      children: snapshot.data!
-                          .map((success) => Dismissible(
-                                key: Key(success.id!
-                                    .toString()), // Handle null and convert to String
-                                background: Container(
-                                  color: Theme.of(context).primaryColorLight,
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0),
-                                  child: const Icon(Icons.delete,
-                                      color: Colors.white),
-                                ),
-                                direction: DismissDirection.endToStart,
-                                onDismissed: (direction) async {
-                                  // Assuming 'success.id' is the identifier of the Success item
-                                  await SuccessDatabaseService()
-                                      .deleteSuccess(success.id!);
-
-                                  setState(() {
-                                    snapshot.data!.remove(success);
-                                  });
-                                },
-                                child: LikableItem(
-                                  success: success,
-                                ),
-                              ))
-                          .toList(),
-                    );
-                  } else if (selectedDate.isAfter(DateTime.now())) {
-                    return const Text(
-                        "You're adding successes in the future😁");
-                  } else {
-                    return const Text('No data available');
-                  }
-                },
-              ),
-            ),
-            // const SizedBox(
-            //   height: 100,
-            // ),
+            boxWithStuff,
           ],
         ),
         floatingActionButton: ExpandableFloatingActionButton(
@@ -157,6 +124,38 @@ class _MyAppState extends State<MyApp> {
           },
         ),
       ),
+    );
+  }
+
+  ListView listViewSuccesses(
+      BuildContext context, AsyncSnapshot<List<Success>> snapshot) {
+    return ListView(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.1),
+      children: snapshot.data!
+          .map((success) => Dismissible(
+                key: Key(success.id!
+                    .toString()), // Handle null and convert to String
+                background: Container(
+                  color: Theme.of(context).primaryColorLight,
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                direction: DismissDirection.endToStart,
+                onDismissed: (direction) async {
+                  // Assuming 'success.id' is the identifier of the Success item
+                  await SuccessDatabaseService().deleteSuccess(success.id!);
+
+                  setState(() {
+                    snapshot.data!.remove(success);
+                  });
+                },
+                child: LikableItem(
+                  success: success,
+                ),
+              ))
+          .toList(),
     );
   }
 }
