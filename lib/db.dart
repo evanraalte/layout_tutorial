@@ -93,8 +93,20 @@ class SuccessDatabaseService {
     );
   }
 
-  Future<List<Success>> successes() async {
-    final List<Map<String, dynamic>> maps = await _database.query('successes');
+  Future<List<Success>> successes({required DateTime filterCreatedDate}) async {
+    // Start of the given day
+    DateTime startDate = DateTime(
+        filterCreatedDate.year, filterCreatedDate.month, filterCreatedDate.day);
+    // Start of the next day
+    DateTime endDate = DateTime(filterCreatedDate.year, filterCreatedDate.month,
+        filterCreatedDate.day + 1);
+
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'successes',
+      where: 'created >= ? AND created < ?',
+      whereArgs: [startDate.toIso8601String(), endDate.toIso8601String()],
+    );
+
     return List.generate(maps.length, (i) {
       DateTime? created = maps[i]['created'] != null
           ? DateTime.parse(maps[i]['created'])

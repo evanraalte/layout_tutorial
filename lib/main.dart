@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:layout_tutorial/date_selector.dart';
 import 'package:layout_tutorial/db.dart';
 import 'package:layout_tutorial/expandable_floating_action_button.dart';
 import 'package:layout_tutorial/likable_item.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late Future<List<Success>> _successListFuture;
   bool isExpanded = false;
+  DateTime selectedDate = DateTime.now();
 
   Future<void> _showAddItemDialog(BuildContext context) async {
     String title = '';
@@ -80,7 +82,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _successListFuture = SuccessDatabaseService().successes();
+    _successListFuture =
+        SuccessDatabaseService().successes(filterCreatedDate: selectedDate);
   }
 
   void _addLikableItem() async {
@@ -95,8 +98,16 @@ class _MyAppState extends State<MyApp> {
 
   void _refreshSuccessList() {
     setState(() {
-      _successListFuture = SuccessDatabaseService().successes();
+      _successListFuture =
+          SuccessDatabaseService().successes(filterCreatedDate: selectedDate);
     });
+  }
+
+  void _onDateChanged(DateTime date) {
+    setState(() {
+      selectedDate = date;
+    });
+    _refreshSuccessList();
   }
 
   @override
@@ -131,6 +142,10 @@ class _MyAppState extends State<MyApp> {
               height: 240,
               fit: BoxFit.cover,
             ),
+            DateSelector(
+              selectedDate: selectedDate,
+              onDateChanged: _onDateChanged,
+            ),
             Expanded(
               child: FutureBuilder<List<Success>>(
                 future: _successListFuture,
@@ -139,7 +154,7 @@ class _MyAppState extends State<MyApp> {
                     return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
-                  } else if (snapshot.hasData) {
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                     return ListView(
                       padding: EdgeInsets.only(
                           bottom: MediaQuery.of(context).size.height * 0.1),
@@ -171,6 +186,9 @@ class _MyAppState extends State<MyApp> {
                               ))
                           .toList(),
                     );
+                  } else if (selectedDate.isAfter(DateTime.now())) {
+                    return const Text(
+                        "You're adding successes in the future😁");
                   } else {
                     return const Text('No data available');
                   }
