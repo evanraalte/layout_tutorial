@@ -51,7 +51,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
               child: Icon(
                 _isFavorited ? Icons.star : Icons.star_border,
                 key: ValueKey<bool>(_isFavorited),
-                color: Colors.red[500],
+                color: Theme.of(context).primaryColorLight,
                 size: 24,
               ),
             ),

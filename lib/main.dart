@@ -105,6 +105,20 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       title: 'Flutter layout demo',
+      theme: ThemeData(
+        brightness: Brightness.light,
+        /* light theme settings */
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        /* dark theme settings */
+      ),
+      themeMode: ThemeMode.dark,
+      /* ThemeMode.system to follow system theme,
+         ThemeMode.light for light theme,
+         ThemeMode.dark for dark theme
+      */
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         // appBar: AppBar(
         //   title: const Text('Flutter layout demo'),
@@ -127,10 +141,33 @@ class _MyAppState extends State<MyApp> {
                     return Text('Error: ${snapshot.error}');
                   } else if (snapshot.hasData) {
                     return ListView(
-                      padding: EdgeInsets.only(bottom: 100),
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).size.height * 0.1),
                       children: snapshot.data!
-                          .map((success) => LikableItem(
-                                success: success,
+                          .map((success) => Dismissible(
+                                key: Key(success.id!
+                                    .toString()), // Handle null and convert to String
+                                background: Container(
+                                  color: Theme.of(context).primaryColorLight,
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: const Icon(Icons.delete,
+                                      color: Colors.white),
+                                ),
+                                direction: DismissDirection.endToStart,
+                                onDismissed: (direction) async {
+                                  // Assuming 'success.id' is the identifier of the Success item
+                                  await SuccessDatabaseService()
+                                      .deleteSuccess(success.id!);
+
+                                  setState(() {
+                                    snapshot.data!.remove(success);
+                                  });
+                                },
+                                child: LikableItem(
+                                  success: success,
+                                ),
                               ))
                           .toList(),
                     );

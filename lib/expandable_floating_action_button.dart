@@ -86,7 +86,7 @@ class _ExpandableFloatingActionButtonState
 
           // Main expandable button
           FloatingActionButton(
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme.of(context).colorScheme.onBackground,
             onPressed: () {
               setState(() {
                 isExpanded = !isExpanded;
