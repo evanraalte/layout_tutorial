@@ -63,7 +63,7 @@ class _ExpandableFloatingActionButtonState
               child: FloatingActionButton(
                 onPressed: widget.onAddItem,
                 tooltip: 'Add Item',
-                child: const Icon(Icons.favorite),
+                child: const Icon(Icons.add),
               ),
             ),
           ),
