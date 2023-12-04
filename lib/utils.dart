@@ -22,3 +22,22 @@ String formatDateTime(DateTime? dateTime) {
   final DateFormat formatter = DateFormat('HH:mm d/M/yyyy');
   return formatter.format(dateTime);
 }
+
+String formatDate(DateTime date, String locale) {
+  DateTime now = DateTime.now();
+  DateTime today = DateTime(now.year, now.month, now.day);
+  DateTime yesterday = today.subtract(const Duration(days: 1));
+  DateTime tomorrow = today.add(const Duration(days: 1));
+  DateTime justDate =
+      DateTime(date.year, date.month, date.day); // Extract just the date part
+
+  if (justDate == today) {
+    return 'Today'; // or use a localized string
+  } else if (justDate == yesterday) {
+    return 'Yesterday'; // or use a localized string
+  } else if (justDate == tomorrow) {
+    return 'Tomorrow'; // or use a localized string
+  } else {
+    return DateFormat('dd-MM-yyyy', locale).format(date);
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:layout_tutorial/add_item_dialog.dart';
 import 'package:layout_tutorial/date_selector.dart';
 import 'package:layout_tutorial/db.dart';
 import 'package:layout_tutorial/expandable_floating_action_button.dart';
@@ -26,59 +27,6 @@ class _MyAppState extends State<MyApp> {
   bool isExpanded = false;
   DateTime selectedDate = DateTime.now();
 
-  Future<void> _showAddItemDialog(BuildContext context) async {
-    String title = '';
-    String subtitle = '';
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button to close the dialog
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add New Item'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextField(
-                  onChanged: (value) {
-                    title = value;
-                  },
-                  decoration: const InputDecoration(hintText: "Enter title"),
-                ),
-                TextField(
-                  onChanged: (value) {
-                    subtitle = value;
-                  },
-                  decoration: const InputDecoration(hintText: "Enter subtitle"),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () async {
-                if (title.isNotEmpty && subtitle.isNotEmpty) {
-                  Success newSuccess =
-                      Success(title: title, subtitle: subtitle);
-                  await SuccessDatabaseService().insertSuccess(newSuccess);
-                  _refreshSuccessList();
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -91,7 +39,8 @@ class _MyAppState extends State<MyApp> {
     String subtitle =
         'Subtitle ${DateTime.now().millisecondsSinceEpoch}'; // Example subtitle
 
-    Success newSuccess = Success(title: title, subtitle: subtitle);
+    Success newSuccess =
+        Success(title: title, subtitle: subtitle, date: selectedDate);
     await SuccessDatabaseService().insertSuccess(newSuccess);
     _refreshSuccessList();
   }
@@ -202,7 +151,10 @@ class _MyAppState extends State<MyApp> {
         ),
         floatingActionButton: ExpandableFloatingActionButton(
           onAddItem: _addLikableItem,
-          onAddCustomItem: _showAddItemDialog,
+          onAddCustomItem: (BuildContext context) {
+            return showAddItemDialog(
+                context, selectedDate, _refreshSuccessList);
+          },
         ),
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:layout_tutorial/utils.dart';
 
 class DateSelector extends StatelessWidget {
   final DateTime selectedDate;
@@ -20,23 +20,6 @@ class DateSelector extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime date, String locale) {
-    DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
-    DateTime yesterday = today.subtract(const Duration(days: 1));
-    DateTime tomorrow = today.add(const Duration(days: 1));
-
-    if (date == today) {
-      return 'Today'; // or use a localized string
-    } else if (date == yesterday) {
-      return 'Yesterday'; // or use a localized string
-    } else if (date == tomorrow) {
-      return 'Tomorrow'; // or use a localized string
-    } else {
-      return DateFormat('dd-MM-yyyy', locale).format(date);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     String locale = Localizations.localeOf(context).toString();
@@ -50,7 +33,7 @@ class DateSelector extends StatelessWidget {
         ),
         TextButton(
           onPressed: () => _selectDate(context),
-          child: Text(_formatDate(selectedDate, locale)),
+          child: Text(formatDate(selectedDate, locale)),
         ),
         IconButton(
           icon: const Icon(Icons.arrow_forward),

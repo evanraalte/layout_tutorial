@@ -10,6 +10,7 @@ class Success {
   final String subtitle;
   final DateTime? created;
   final DateTime? modified;
+  final DateTime? date;
 
   const Success({
     this.id,
@@ -17,6 +18,7 @@ class Success {
     required this.subtitle,
     this.created,
     this.modified,
+    this.date,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,12 +28,13 @@ class Success {
       'subtitle': subtitle,
       if (created != null) 'created': created!.toIso8601String(),
       if (modified != null) 'modified': modified!.toIso8601String(),
+      if (date != null) 'date': date!.toIso8601String(),
     };
   }
 
   @override
   String toString() {
-    return 'Success{id: $id, title: $title, subtitle: $subtitle, created: ${formatDateTime(created)}, modified: ${formatDateTime(modified)}}';
+    return 'Success{id: $id, title: $title, subtitle: $subtitle, created: ${formatDateTime(created)}, modified: ${formatDateTime(modified)}},  date: ${formatDateTime(date)}';
   }
 }
 
@@ -53,6 +56,14 @@ class SuccessDatabaseService {
       await db.rawUpdate(
           'UPDATE successes SET created = ?, modified = ?', [now, now]);
     }
+
+    if (oldVersion < 3) {
+      // Add the new 'date' column
+      await db.execute('ALTER TABLE successes ADD COLUMN date TEXT');
+
+      // Update existing rows to set the 'date' column value from 'created'
+      await db.rawUpdate('UPDATE successes SET date = created');
+    }
     // Implement further migrations if newVersion > 2
   }
 
@@ -61,11 +72,11 @@ class SuccessDatabaseService {
       join(await getDatabasesPath(), 'success_database.db'),
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE successes(id INTEGER PRIMARY KEY, title TEXT, subtitle TEXT, created TEXT, modified TEXT)',
+          'CREATE TABLE successes(id INTEGER PRIMARY KEY, title TEXT, subtitle TEXT, created TEXT, modified TEXT, date TEXT)',
         );
       },
       onUpgrade: _onUpgrade,
-      version: 2,
+      version: 3,
     );
   }
 
@@ -84,6 +95,7 @@ class SuccessDatabaseService {
       subtitle: success.subtitle,
       created: now,
       modified: now,
+      date: success.date ?? now,
     );
 
     await _database.insert(
@@ -103,7 +115,7 @@ class SuccessDatabaseService {
 
     final List<Map<String, dynamic>> maps = await _database.query(
       'successes',
-      where: 'created >= ? AND created < ?',
+      where: 'date >= ? AND date < ?',
       whereArgs: [startDate.toIso8601String(), endDate.toIso8601String()],
     );
 
@@ -115,12 +127,16 @@ class SuccessDatabaseService {
           ? DateTime.parse(maps[i]['modified'])
           : null;
 
+      DateTime? date =
+          maps[i]['date'] != null ? DateTime.parse(maps[i]['date']) : null;
+
       return Success(
         id: maps[i]['id'],
         title: maps[i]['title'],
         subtitle: maps[i]['subtitle'],
         created: created,
         modified: modified,
+        date: date,
       );
     });
   }
