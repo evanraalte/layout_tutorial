@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:intl/intl.dart';
+import 'package:layout_tutorial/db.dart';
+import 'package:path_provider/path_provider.dart';
 
 List<String> adjectives = [
   "Peaceful",
@@ -23,7 +27,7 @@ String formatDateTime(DateTime? dateTime) {
   return formatter.format(dateTime);
 }
 
-String formatDate(DateTime date, String locale) {
+String formatDate(DateTime date) {
   DateTime now = DateTime.now();
   DateTime today = DateTime(now.year, now.month, now.day);
   DateTime yesterday = today.subtract(const Duration(days: 1));
@@ -38,6 +42,36 @@ String formatDate(DateTime date, String locale) {
   } else if (justDate == tomorrow) {
     return 'Tomorrow'; // or use a localized string
   } else {
-    return DateFormat('dd-MM-yyyy', locale).format(date);
+    return DateFormat('dd-MM-yyyy').format(date);
+  }
+}
+
+Future<String?> exportJson() async {
+  try {
+    // Fetch all successes from the database
+    var successes = await SuccessDatabaseService().getAllSuccesses();
+
+    // Convert each success to a Map and then to a JSON string
+    var jsonData = jsonEncode(successes.map((s) => s.toMap()).toList());
+
+    // Get the directory to save the file
+    final directory = await getApplicationDocumentsDirectory();
+
+    // Format the current date and time
+    String formattedDateTime =
+        DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+
+    // Create the file with the date and time in the name
+    final file =
+        File('${directory.path}/successes_export_$formattedDateTime.json');
+
+    // Write the JSON data to the file
+    await file.writeAsString(jsonData);
+
+    // Return the file path for confirmation
+    return file.path;
+  } catch (e) {
+    // In case of an error, return null
+    return null;
   }
 }

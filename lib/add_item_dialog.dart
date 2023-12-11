@@ -40,7 +40,7 @@ Future<bool> showAddItemDialog(
                     ListTile(
                       title: Text(selectedDateForItem == null
                           ? 'No date selected'
-                          : 'Selected date: ${formatDate(selectedDateForItem!, Localizations.localeOf(context).toString())}'),
+                          : 'Selected date: ${formatDate(selectedDateForItem!)}'),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final DateTime? picked = await showDatePicker(

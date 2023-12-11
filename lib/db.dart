@@ -125,6 +125,25 @@ class SuccessDatabaseService {
     );
   }
 
+  Future<List<Success>> getAllSuccesses() async {
+    final List<Map<String, dynamic>> maps = await _database.query('successes');
+
+    return List.generate(maps.length, (i) {
+      return Success(
+        id: maps[i]['id'],
+        title: maps[i]['title'],
+        subtitle: maps[i]['subtitle'],
+        created: maps[i]['created'] != null
+            ? DateTime.parse(maps[i]['created'])
+            : null,
+        modified: maps[i]['modified'] != null
+            ? DateTime.parse(maps[i]['modified'])
+            : null,
+        date: maps[i]['date'] != null ? DateTime.parse(maps[i]['date']) : null,
+      );
+    });
+  }
+
   Future<List<Success>> successes({required DateTime filterCreatedDate}) async {
     // Start of the given day
     DateTime startDate = DateTime(

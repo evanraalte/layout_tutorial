@@ -22,7 +22,6 @@ class DateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String locale = Localizations.localeOf(context).toString();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -33,7 +32,7 @@ class DateSelector extends StatelessWidget {
         ),
         TextButton(
           onPressed: () => _selectDate(context),
-          child: Text(formatDate(selectedDate, locale)),
+          child: Text(formatDate(selectedDate)),
         ),
         IconButton(
           icon: const Icon(Icons.arrow_forward),

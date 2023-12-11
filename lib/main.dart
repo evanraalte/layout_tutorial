@@ -1,9 +1,11 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:layout_tutorial/add_item_dialog.dart';
 import 'package:layout_tutorial/date_selector.dart';
 import 'package:layout_tutorial/db.dart';
 import 'package:layout_tutorial/likable_item.dart';
+import 'package:layout_tutorial/utils.dart';
 
 // Uncomment lines 3 and 6 to view the visual layout at runtime.
 // import 'package:flutter/rendering.dart' show debugPaintSizeEnabled;
@@ -19,6 +21,13 @@ class MyApp extends StatefulWidget {
 
   @override
   State<MyApp> createState() => _MyAppState();
+}
+
+Widget paddedCenteredWidget(Widget child) {
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Center(child: child),
+  );
 }
 
 class _MyAppState extends State<MyApp> {
@@ -66,14 +75,16 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            return paddedCenteredWidget(Text('Error: ${snapshot.error}'));
           } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             return listViewSuccesses(context, snapshot);
           } else if (selectedDate.isAfter(DateTime.now())) {
-            return const Text("You're adding successes in the future😁");
+            return paddedCenteredWidget(
+                const Text("You're adding successes in the future😁"));
           } else {
-            return const Text(
-                'Come on, you must have achieved soemthing today!');
+            return paddedCenteredWidget(
+              const Text('Come on, you must have achieved soemthing today!'),
+            );
           }
         },
       ),
@@ -95,9 +106,66 @@ class _MyAppState extends State<MyApp> {
       */
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        // appBar: AppBar(
+        // appBar: App`Bar(
         //   title: const Text('Flutter layout demo'),
         // ),
+        appBar: AppBar(
+          title: Text("Suc6: ${formatDate(selectedDate)}"),
+          actions: [
+            IconButton(
+              onPressed: () {
+                _onDateChanged(selectedDate.subtract(const Duration(days: 1)));
+              },
+              icon: const Icon(Icons.keyboard_arrow_left),
+            ),
+            IconButton(
+              onPressed: () {
+                _onDateChanged(selectedDate.add(const Duration(days: 1)));
+              },
+              icon: const Icon(Icons.keyboard_arrow_right),
+            ),
+          ],
+        ),
+        drawer: Drawer(
+          child: ListView(children: [
+            const DrawerHeader(
+              child: Text("Menu"),
+            ),
+            Builder(
+              builder: (context) => ListTile(
+                title: const Text('Export JSON'),
+                onTap: () async {
+                  String? exportedFilePath = await exportJson();
+                  if (!context.mounted) {
+                    return;
+                  }
+                  if (exportedFilePath != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Exported to $exportedFilePath'),
+                        duration: const Duration(seconds: 3),
+                        action: SnackBarAction(
+                            label: 'Copy Path',
+                            onPressed: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: exportedFilePath));
+                            }),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Error exporting JSON'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                  Navigator.pop(context); // Close the drawer
+                },
+              ),
+            ),
+          ]),
+        ),
         body: GestureDetector(
           onHorizontalDragEnd: (DragEndDetails details) {
             if (details.primaryVelocity! > 0) {
@@ -110,16 +178,10 @@ class _MyAppState extends State<MyApp> {
           },
           child: Column(
             children: [
-              Image.asset(
-                'images/lake.jpg',
-                width: 600,
-                height: 240,
-                fit: BoxFit.cover,
-              ),
-              DateSelector(
-                selectedDate: selectedDate,
-                onDateChanged: _onDateChanged,
-              ),
+              // DateSelector(
+              //   selectedDate: selectedDate,
+              //   onDateChanged: _onDateChanged,
+              // ),
               ConfettiWidget(
                 confettiController: _confettiController,
                 blastDirectionality:

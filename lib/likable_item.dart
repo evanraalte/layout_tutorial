@@ -137,9 +137,13 @@ void showConfirmDeleteDialog(BuildContext context, Success item) {
             onPressed: () async {
               // Implement delete logic
               await SuccessDatabaseService().deleteSuccess(item.id!);
-              Navigator.of(dialogContext)
-                  .pop(); // Close the confirmation dialog
-              Navigator.of(context).pop(); // Close the edit dialog
+              if (context.mounted) {
+                Navigator.of(dialogContext)
+                    .pop(); // Close the confirmation dialog
+              }
+              if (context.mounted) {
+                Navigator.of(context).pop(); // Close the edit dialog
+              }
             },
           ),
         ],
