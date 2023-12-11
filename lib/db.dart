@@ -105,6 +105,26 @@ class SuccessDatabaseService {
     );
   }
 
+  Future<void> updateSuccess(Success success) async {
+    var now = DateTime.now();
+    var successToUpdate = Success(
+      id: success.id,
+      title: success.title,
+      subtitle: success.subtitle,
+      created: success.created,
+      modified: now, // Update the modified time
+      date: success.date,
+    );
+
+    await _database.update(
+      'successes',
+      successToUpdate.toMap(),
+      where: 'id = ?',
+      whereArgs: [success.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<List<Success>> successes({required DateTime filterCreatedDate}) async {
     // Start of the given day
     DateTime startDate = DateTime(

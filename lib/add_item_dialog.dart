@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:layout_tutorial/db.dart';
 import 'package:layout_tutorial/utils.dart';
 
-Future<void> showAddItemDialog(BuildContext context, DateTime selectedDate,
-    Function refreshSuccessList) async {
+Future<bool> showAddItemDialog(
+    BuildContext context, DateTime selectedDate) async {
   String title = '';
-  String subtitle = '';
   DateTime? selectedDateForItem = selectedDate;
   final formKey = GlobalKey<FormState>();
+  bool itemAdded = false;
 
-  return showDialog<void>(
+  await showDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
@@ -26,24 +26,13 @@ Future<void> showAddItemDialog(BuildContext context, DateTime selectedDate,
                       onChanged: (value) {
                         title = value;
                       },
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
                       decoration:
                           const InputDecoration(hintText: "Enter title"),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a title';
-                        }
-                        return null;
-                      },
-                    ),
-                    TextFormField(
-                      onChanged: (value) {
-                        subtitle = value;
-                      },
-                      decoration:
-                          const InputDecoration(hintText: "Enter subtitle"),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a subtitle';
                         }
                         return null;
                       },
@@ -82,13 +71,13 @@ Future<void> showAddItemDialog(BuildContext context, DateTime selectedDate,
                 child: const Text('Add'),
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
-                    if (title.isNotEmpty && subtitle.isNotEmpty) {
+                    if (title.isNotEmpty) {
                       Success newSuccess = Success(
                           title: title,
-                          subtitle: subtitle,
+                          subtitle: "",
                           date: selectedDateForItem); // Use the selected date
                       await SuccessDatabaseService().insertSuccess(newSuccess);
-                      refreshSuccessList();
+                      itemAdded = true;
                       Navigator.of(context).pop();
                     }
                   }
@@ -100,4 +89,5 @@ Future<void> showAddItemDialog(BuildContext context, DateTime selectedDate,
       );
     },
   );
+  return itemAdded;
 }
