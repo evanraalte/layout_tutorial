@@ -98,36 +98,47 @@ class _MyAppState extends State<MyApp> {
         // appBar: AppBar(
         //   title: const Text('Flutter layout demo'),
         // ),
-        body: Column(
-          children: [
-            Image.asset(
-              'images/lake.jpg',
-              width: 600,
-              height: 240,
-              fit: BoxFit.cover,
-            ),
-            DateSelector(
-              selectedDate: selectedDate,
-              onDateChanged: _onDateChanged,
-            ),
-            ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality:
-                  BlastDirectionality.explosive, // Full-screen blast
-              shouldLoop: false,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink,
-                Colors.orange,
-                Colors.purple
-              ], // Add more colors as you like
-              maxBlastForce: 10, // set a lower max blast force
-              minBlastForce: 2, // set a lower min blast force
-              numberOfParticles: 50, // number of particles to be emitted
-            ),
-            boxWithStuff,
-          ],
+        body: GestureDetector(
+          onHorizontalDragEnd: (DragEndDetails details) {
+            if (details.primaryVelocity! > 0) {
+              // User swiped Right
+              _onDateChanged(selectedDate.subtract(const Duration(days: 1)));
+            } else if (details.primaryVelocity! < 0) {
+              // User swiped Left
+              _onDateChanged(selectedDate.add(const Duration(days: 1)));
+            }
+          },
+          child: Column(
+            children: [
+              Image.asset(
+                'images/lake.jpg',
+                width: 600,
+                height: 240,
+                fit: BoxFit.cover,
+              ),
+              DateSelector(
+                selectedDate: selectedDate,
+                onDateChanged: _onDateChanged,
+              ),
+              ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality:
+                    BlastDirectionality.explosive, // Full-screen blast
+                shouldLoop: false,
+                colors: const [
+                  Colors.green,
+                  Colors.blue,
+                  Colors.pink,
+                  Colors.orange,
+                  Colors.purple
+                ], // Add more colors as you like
+                maxBlastForce: 10, // set a lower max blast force
+                minBlastForce: 2, // set a lower min blast force
+                numberOfParticles: 50, // number of particles to be emitted
+              ),
+              boxWithStuff,
+            ],
+          ),
         ),
 
         floatingActionButton: Builder(builder: (context) {
