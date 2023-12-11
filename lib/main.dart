@@ -222,17 +222,19 @@ class _MyAppState extends State<MyApp> {
 
   ListView listViewSuccesses(
       BuildContext context, AsyncSnapshot<List<Success>> snapshot) {
-    return ListView(
+    return ListView.separated(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.1),
-      children: snapshot.data!
-          .map(
-            (success) => LikableItem(
-              success: success,
-              refreshSuccessList: _refreshSuccessList,
-            ),
-          )
-          .toList(),
+      separatorBuilder: (BuildContext context, int index) => const Divider(
+        indent: 40,
+        endIndent: 40,
+      ),
+      itemCount: snapshot.data!.length,
+      itemBuilder: (BuildContext context, int index) {
+        return LikableItem(
+            success: snapshot.data![index],
+            refreshSuccessList: _refreshSuccessList);
+      },
     );
   }
 }
